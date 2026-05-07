@@ -9,7 +9,7 @@ int siz=0;
 void push(int x){
     heap[++siz]=x;
     int now=siz;
-    while(now){
+    while(now>1){
         int nxt = now>>1;
         if(heap[nxt]>heap[now]) swap(heap[nxt],heap[now]);
         else break;

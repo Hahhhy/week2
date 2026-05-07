@@ -69,9 +69,9 @@ int main()
 {
     scanf( "%d%d%d", &n, &m, &s );
     for(int i = 1; i <= n; ++i)dis[i] = 0x7fffffff;
-    for( register int i = 0; i < m; ++i )
+    for(int i = 0; i < m; ++i )
     {
-        register int u, v, d;
+        int u, v, d;
         scanf( "%d%d%d", &u, &v, &d );
         add_edge( u, v, d );
     }

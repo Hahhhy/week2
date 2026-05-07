@@ -42,20 +42,35 @@ void post_rec(int u){
 }
 //后序，非递归
 void post_iter(int root){
+
     if(!root) return;
+
     stack<pair<int,int>> st;
+
     st.push({root,0});
+
     while(!st.empty()){
+
         int u=st.top().first;
+
         int idx=st.top().second;
+
         st.pop();
+
         if(idx<son[u].size()){
+
             st.push({u,idx+1});
+
             st.push({son[u][idx],0});
+
         }else{
+
             cout<<val[u]<<" ";
+
         }
+
     }
+
 }
 
 //中序遍历，递归

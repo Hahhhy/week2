@@ -1,117 +1,161 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-#define maxleng 1000
+struct Node{
+    string val;
+    Node* ls;
+    Node*rs;
+};
 
-typedef struct ExprNode {
-    int is_op;               // 标志位：1 表示是运算符，0 表示是纯数字
-    int val;                 // 如果是数字，存具体的数值
-    char op;                 // 如果是运算符，存 '+', '-', '*', '/'
-    struct ExprNode *left;   // 左子树
-    struct ExprNode *right;  // 右子树
-} ExprNode;
-
-// 创建一个数字节点 (叶子节点)
-ExprNode* NewNumNode(int val) {
-    ExprNode *p = (ExprNode*)malloc(sizeof(ExprNode));
-    p->is_op = 0;
-    p->val = val;
-    p->left = NULL;
-    p->right = NULL;
+Node* newNode(string v){
+    Node* p=new Node;
+    p->val=v;
+    p->ls=p->rs=nullptr;
     return p;
 }
 
-// 创建一个运算符节点 (内部节点)
-ExprNode* NewOpNode(char op, ExprNode *lchild, ExprNode *rchild) {
-    ExprNode *p = (ExprNode*)malloc(sizeof(ExprNode));
-    p->is_op = 1;
-    p->op = op;
-    p->left = lchild;
-    p->right = rchild;
-    return p;
+int getPriority(char op){
+    if(op=='+'||op=='-') return 1;
+    if(op=='*'||op=='/') return 2;
+    return 0;
 }
 
+vector<string> infixToPosfix(string infix){
+    vector<string> posfix;
+    stack<char> ops;
+    int n=infix.length();
 
-// 从后缀表达式字符串构建
-ExprNode* BuildExprTreeFromPostfix(const char *postfix) {
-    // 注意：现在的栈里存的是 树节点的指针，而不是数字！
-    ExprNode* st[maxleng]; 
-    int top = 0;
-    int i = 0;
+    for(int i=0;i<n;++i){
+        if(infix[i]==' ') continue;
 
-    while (postfix[i] != '\0') {
-        if (postfix[i] == ' ') {
-            i++;
-            continue;
-        }
-
-        if (isdigit(postfix[i])) {
-            int num = 0;
-            while (isdigit(postfix[i])) {
-                num = num * 10 + (postfix[i] - '0');
-                i++;
+        if(isdigit(infix[i])){
+            string num="";
+            while(i<n&&isdigit(infix[i])){
+                num+=infix[i];
+                ++i;
             }
-            // 遇到数字：直接建一个叶子节点，压入树栈
-            st[top++] = NewNumNode(num);
-        } else {
-            // 遇到运算符：从栈里弹出两棵现成的子树
-            ExprNode *rightNode = st[--top];
-            ExprNode *leftNode = st[--top];
-            
-            char op = postfix[i++];
-            
-            // 用当前运算符当根，把两棵子树“拼”起来，形成一棵更大的树
-            ExprNode *newRoot = NewOpNode(op, leftNode, rightNode);
-            
-            // 把拼好的新树重新压回栈中
-            st[top++] = newRoot;
+            i--;
+            posfix.push_back(num);
+        }
+        else if(infix[i]=='('){
+            ops.push('(');
+        }
+        else if(infix[i]==')'){
+            while(!ops.empty()&&ops.top()!='('){
+                posfix.push_back(string(1,ops.top()));
+                ops.pop();
+            }
+            if(!ops.empty()) ops.pop();
+        }
+        else{
+            while(!ops.empty()&&getPriority(ops.top())>=getPriority(infix[i])){
+                posfix.push_back(string(1,ops.top()));
+                ops.pop();
+            }
+            ops.push(infix[i]);
         }
     }
-    
-    // 循环结束后，栈里只会剩下唯一一个节点，这就是整棵表达式树的树根！
-    return st[0];
+
+    while(!ops.empty()){
+        posfix.push_back(string(1,ops.top()));
+        ops.pop();
+    }
+    return posfix;
 }
 
-//对这棵树进行【后序遍历】来求出最终结果
+Node* buildTree(vector<string>& posfix){
+    stack<Node*> st;
+    for(string s:posfix){
+        if(s=="+"||s == "-" || s == "*" || s == "/"){
+            Node* root=newNode(s);
+            root->rs=st.top();
+            st.pop();
+            root->ls=st.top();
+            st.pop();
+            st.push(root);
+        }else{
+            st.push(newNode(s));
+        }
+    }
+    return st.empty()?nullptr:st.top();
+}
 
-int EvaluateExprTree(ExprNode *root) {
-    if (root == NULL) return 0;
 
-    // 递归边界：如果是叶子节点（纯数字），直接返回它的值
-    if (root->is_op == 0) {
-        return root->val;
+void preOrder(Node* root){
+    if(!root) return;
+    cout<<root->val<<" ";
+    preOrder(root->ls);
+    preOrder(root->rs);
+}
+
+void inOrder(Node* root){
+    if(!root) return;
+    inOrder(root->ls);
+    cout<<root->val<<" ";
+    inOrder(root->rs);
+}
+
+void posOrder(Node* root){
+    if(!root) return;
+    posOrder(root->ls);
+    posOrder(root->rs);
+    cout<<root->val<<" ";
+}
+
+void levelOrder(Node* root){
+    if(!root) return;
+    queue<Node*> q;
+    q.push(root);
+    while(!q.empty()){
+        Node* curr=q.front();
+        q.pop();
+        cout<<curr->val<<" ";
+        if(curr->ls) q.push(curr->ls);
+        if(curr->rs) q.push(curr->rs);
+    }
+}
+
+
+long long evaluateTree(Node* root){
+    if(!root) return 0;
+
+    if(!root->ls&&!root->rs){
+        return stoll(root->val);
     }
 
-    // 后序遍历核心：分治法，自底向上！
-    // 1. 先算出左子树的结果
-    int left_val = EvaluateExprTree(root->left);
-    
-    // 2. 再算出右子树的结果
-    int right_val = EvaluateExprTree(root->right);
-    
-    // 3. 最后在根节点进行合并计算
-    if (root->op == '+') return left_val + right_val;
-    if (root->op == '-') return left_val - right_val;
-    if (root->op == '*') return left_val * right_val;
-    if (root->op == '/') return left_val / right_val;
+    long long leftVal=evaluateTree(root->ls);
+    long long rightVal=evaluateTree(root->rs);
+
+    if(root->val=="+") return leftVal+rightVal;
+    if(root->val=="-") return leftVal-rightVal;
+    if(root->val=="*") return leftVal*rightVal;
+    if(root->val=="/") return leftVal/rightVal;
 
     return 0;
 }
 
-int main() {
-    // 我们用上一步转换好的后缀表达式："8 3 2 6 * + 5 / - 14 +"
-    // 它对应的中缀是 "8 - (3 + 2 * 6) / 5 + 14"
-    const char *postfix = "8 3 2 6 * + 5 / - 14 +";
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+
+    string infix;
+
+    cout<<"请输入中缀表达式"<<endl;
+    getline(cin,infix);
+    if(infix.empty()) return 0;
+    vector<string> posfix=infixToPosfix(infix);
+    Node* root=buildTree(posfix);
+    cout << "\n--- 树的遍历测试 ---\n";
+    cout << "先序遍历: "; preOrder(root); cout << "\n";
+    cout << "中序遍历: "; inOrder(root); cout << "\n";
+    cout << "后序遍历: "; posOrder(root); cout << "\n";
+    cout << "层序遍历: "; levelOrder(root); cout << "\n";
     
-    printf("输入的后缀表达式: %s\n", postfix);
-    
-    // 1. 真正在内存中建树！拿到这棵树的树根
-    ExprNode *root = BuildExprTreeFromPostfix(postfix);
-    printf("表达式二叉树已在内存中物理构建完毕！\n");
-    
-    // 2. 利用后序遍历，自底向上求出答案
-    int result = EvaluateExprTree(root);
-    printf("对树进行后序遍历求得的最终结果: %d\n", result);
+    // 4. 求值
+    cout << "\n--- 计算结果 ---\n";
+    long long ans = evaluateTree(root);
+    cout << "表达式的值为: " << ans << "\n";
     
     return 0;
 }
