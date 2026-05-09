@@ -19,7 +19,7 @@ bool cmp(Edge a,Edge b){
 int fa[N];
 
 int find(int x){
-    if(fa[x]==x) return 0;
+    if(fa[x]==x) return x;
     return fa[x]=find(fa[x]);
 }
 
