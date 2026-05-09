@@ -93,20 +93,30 @@ void in_iter(int root){
     stack<pair<int,int>> st;
     st.push({root,0});
     while(!st.empty()){
-        int u=st.top().first;
-        int idx=st.top().second;
+        int u = st.top().first;
+        int idx = st.top().second;
         st.pop();
+        
         if(son[u].empty()){
-            if(idx==0) cout<<val[u]<<" ";
-        }else if(idx==1){
-            if(son[u].size()>1){
-                st.push({u,2});
-                st.push({son[u][1],0});
-            }
-        }else{
-            if(idx<son[u].size()){
-                st.push({u,idx+1});
-                st.push({son[u][idx],0});
+            if(idx == 0) cout << val[u] << " ";
+        } else {
+            if(idx == 0){
+                // 状态0：准备访问第一个子节点
+                st.push({u, 1}); // 当前节点状态推进到1
+                st.push({son[u][0], 0});
+            } else if(idx == 1){
+                // 状态1：第一个子节点访问完毕，此时应该打印当前节点
+                cout << val[u] << " "; 
+                if(son[u].size() > 1){
+                    st.push({u, 2}); // 状态推进到2
+                    st.push({son[u][1], 0});
+                }
+            } else {
+                // 状态 >= 2：访问后续的子节点
+                if(idx < son[u].size()){
+                    st.push({u, idx + 1});
+                    st.push({son[u][idx], 0});
+                }
             }
         }
     }

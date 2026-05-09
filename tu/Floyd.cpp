@@ -1,13 +1,11 @@
 //在一个带权重的图中（无论是无向图还是有向图），Floyd算法可以计算出任意两个节点之间的最短路径
-//B3647 【模板】Floyd
+//B3647 【模板】Floydhttps://www.luogu.com.cn/problem/B3647
 #include <iostream>
 #include <algorithm>
 
 using namespace std;
 
-// 使用 0x3f3f3f3f 作为无穷大是一个非常经典的技巧
-// 它的十进制大约是 10^9，足够大，且两个 INF 相加不会导致 int 溢出变成负数
-const int INF = 0x3f3f3f3f; 
+const int INF = 10e9; 
 const int MAXN = 105; 
 
 int d[MAXN][MAXN];
@@ -41,8 +39,7 @@ int main() {
     }
 
     // 3. Floyd 核心算法 (动态规划思想)
-    //最外层循环要是中间节点 k！
-    //离散数学？
+    //最外层循环要是中间节点 k！？挖人shell
     for (int k = 1; k <= n; k++) {
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= n; j++) {

@@ -1,38 +1,69 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-//哨兵分划
-int partition(vector<int> &nums,int left,int right){
-    //每次以left下标代表的数字进行划分基准
-    int pivot=nums[left];
-    int i=left,j=right;
-    while(i<j){
-        while(i<j&&nums[j]>=nums[left]){
+int partition(vector<int> &nums, int left, int right)
+{
+    int mid = left + (right - left) / 2;
+    swap(nums[left], nums[mid]); 
+
+    int pivot = nums[left]; 
+    int i = left, j = right;
+    
+    while(i < j){
+        while(i < j && nums[j] >= pivot){
             j--;
         }
-        while(i<j&&nums[i]<=nums[left]){
+
+        while(i < j && nums[i] <= pivot){
             i++;
         }
-        swap(nums[i],nums[j]);
+
+        swap(nums[i], nums[j]);
     }
-    swap(nums[left],nums[i]);
-    return i;
+
+    swap(nums[left], nums[i]);
+    return
+ i;
 }
 
-void quickSort(vector<int> &nums,int left,int right){
-    if(left>=right){
-        return;
+void quickSort(vector<int> &nums, int left, int right){
+    if(left >= right) return;
+    int pivot = nums[left + (right - left) / 2];
+    int i = left, j = right;
+    
+    while(i <= j){
+        while(nums[i] < pivot) i++;
+        while(nums[j] > pivot) j--;
+        
+        if(i <= j){
+            swap(nums[i], nums[j]);
+            i++;
+            j--;
+        }
     }
-    int pivot=partition(nums,left,right);
-    quickSort(nums,left,pivot-1);
-    quickSort(nums,pivot+1,right);
+    
+    quickSort(nums, left, j);
+    quickSort(nums, i, right);
 }
 
 int main(){
-    vector<int> nums={3,2,1,5,4};
-    quickSort(nums,0,nums.size()-1);
-    for(int i=0;i<nums.size();i++){
-        cout<<nums[i]<<" ";
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    
+    int n;
+    if(!(cin >> n)) return 0;
+    
+    vector<int> nums(n);
+    for(int i = 0; i < n; i++){
+        cin >> nums[i];
     }
+    
+    quickSort(nums, 0, nums.size() - 1);
+    
+    for(int i = 0; i < nums.size(); i++){
+        cout << nums[i] << " ";
+    }
+    cout << "\n";
+    
     return 0;
 }
