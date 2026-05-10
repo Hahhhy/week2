@@ -123,12 +123,12 @@ void in_iter(int root){
 }
 
 //层级遍历
-void level_rec_dfs(int u,int depth){
+void level_rec_bfs(int u,int depth){
     if(!u) return;
     max_depth=max(max_depth,depth);
     level_nodes[depth].push_back(u);
     for(int v:son[u]){
-        level_rec_dfs(v,depth+1);
+        level_rec_bfs(v,depth+1);
     }
 }
 
@@ -137,7 +137,7 @@ void level_rec(int root){
         level_nodes[i].clear();
     }
     max_depth=0;
-    level_rec_dfs(root,0);
+    level_rec_bfs(root,0);
     for(int i=0;i<=max_depth;i++){
         for(int u:level_nodes[i]){
             cout<<val[u]<<" ";
@@ -157,7 +157,7 @@ void level_iter(int root){
             q.push(v);
         }
     }
-    }
+}
     
     
 
